@@ -1,9 +1,11 @@
 "use client";
-// import { useState } from "react";
 import Link from "next/link";
-// import type { FormProps } from "antd";
+import { Button, Typography, Form, Input, Alert, message } from "antd";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
-import { Button, Typography, Form, Input, message } from "antd";
+import { Login, Register } from "@/utils/apiAuth";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 const { Title } = Typography;
 
 interface props {
@@ -19,25 +21,56 @@ interface values {
 
 function AuthForm({ title, footer, href }: props) {
   const footerSplit = footer.split("|");
+  const [code, setCode] = useState(-1);
+  const [alertMsg, setAlertMsg] = useState("");
+  const router = useRouter();
 
-  const onFinish = (values: values) => {
-    message.error("Aya beneran istriku");
-    message.success("Aya istrikuuu");
-    console.log(values);
-    alert(`username: ${values.username}\npassword: ${values.password}`);
+  const onFinish = async (values: values) => {
+    let result;
+
+    if (href == "/register") {
+      // login
+      result = await Login(values);
+      setCode(result.code);
+      if (result.code == 0) {
+        message.success(result.message);
+        setTimeout(() => {
+          router.push("/");
+        }, 1500);
+      } else {
+        message.error(result.message);
+      }
+    } else {
+      //register
+      result = await Register(values);
+      setCode(result.code);
+      if (result.code == 0) {
+        message.success(result.message);
+        setTimeout(() => {
+          router.push("/login");
+        }, 1500);
+      } else {
+        message.error(result.message);
+      }
+    }
+
+    setAlertMsg(result.message);
   };
   return (
     <>
       <Title className="text-center" level={3}>
         Halaman {title} Aplikasi Penjualan Waserda
       </Title>
-      {/*<Alert
-        message="Error"
-        description="username atau password anda salah"
-        type="error"
-        showIcon
-        closable
-      />*/}
+      {code === 1 ? (
+        <Alert
+          message="Error"
+          description={alertMsg}
+          type="error"
+          showIcon
+          closable
+          onClose={() => setCode(0)}
+        />
+      ) : null}
       <Form onFinish={(values: values) => onFinish(values)} layout="vertical">
         <Form.Item
           name="username"
@@ -56,6 +89,8 @@ function AuthForm({ title, footer, href }: props) {
             prefix={<UserOutlined />}
             placeholder="Masukan username anda"
             maxLength={30}
+            status={code === 1 ? "error" : ""}
+            onChange={() => setCode(0)}
           />
         </Form.Item>
         <Form.Item
@@ -75,6 +110,8 @@ function AuthForm({ title, footer, href }: props) {
             prefix={<LockOutlined />}
             placeholder="Masukan password anda"
             maxLength={30}
+            status={code === 1 && href === "/register" ? "error" : ""}
+            onChange={() => setCode(0)}
           />
         </Form.Item>
         {/* Conditional rendering */}
@@ -109,6 +146,7 @@ function AuthForm({ title, footer, href }: props) {
             />
           </Form.Item>
         ) : null}
+        {/* End conditional rendering */}
         <Form.Item className="text-center mt-5">
           <Button block type="primary" size="large" htmlType="submit">
             {title}
