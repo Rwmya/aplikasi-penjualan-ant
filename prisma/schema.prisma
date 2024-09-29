@@ -18,3 +18,11 @@ model User {
   username String @unique
   password String
 }
+
+model Barang {
+  id         Int    @id @default(autoincrement())
+  namaBarang String @unique
+  harga      Int
+  jumlah     Int
+  satuan     String
+}
