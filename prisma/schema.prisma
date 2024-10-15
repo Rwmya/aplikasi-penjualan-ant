@@ -19,10 +19,49 @@ model User {
   password String
 }
 
+model Customer {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique
+  field        String
+  debt         Int           @default(0) // Track the customer's debt
+  transactions Transaction[] // Relation to Transaction
+}
+
+model Transaction {
+  id         Int               @id @default(autoincrement())
+  customerId Int // Foreign key to associate the transaction with a customer
+  date       DateTime          @default(now()) // Timestamp for the transaction
+  isPaid     Boolean           @default(false) // Track if the transaction is paid
+  customer   Customer          @relation(fields: [customerId], references: [id]) // Relation to Customer
+  items      TransactionItem[] // Relation to TransactionItem
+}
+
+model TransactionItem {
+  id            Int         @id @default(autoincrement())
+  transactionId Int // Foreign key to Transaction
+  barangId      Int // Foreign key to Barang
+  jumlah        Int // Quantity of the item in the transaction
+  barang        Barang      @relation(fields: [barangId], references: [id]) // Relation to Barang
+  transaction   Transaction @relation(fields: [transactionId], references: [id]) // Relation to Transaction
+}
+
 model Barang {
-  id         Int    @id @default(autoincrement())
-  namaBarang String @unique
-  harga      Int
+  id               Int               @id @default(autoincrement())
+  namaBarang       String            @unique
+  harga            Int
+  jumlah           Int
+  satuan           String
+  createdAt        DateTime          @default(now())
+  history          HistoryBarang[] // One-to-many relationship with HistoryBarang
+  transactionItems TransactionItem[] // Relation to TransactionItem
+}
+
+model HistoryBarang {
+  id         Int      @id @default(autoincrement())
+  barangId   Int // Foreign key to link to Barang
+  namaBarang String // Name of the item (for clarity in history)
   jumlah     Int
-  satuan     String
+  action     String // Description of the action (e.g., added, removed, updated)
+  changedAt  DateTime @default(now()) // Timestamp of the change
+  barang     Barang   @relation(fields: [barangId], references: [id]) // Relation to Barang
 }

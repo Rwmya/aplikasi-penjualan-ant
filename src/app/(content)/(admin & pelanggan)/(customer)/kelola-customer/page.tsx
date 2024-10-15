@@ -9,25 +9,25 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 
-interface Item {
+interface Customer {
   key: string;
   name: string;
-  satuan: string;
-  harga: number;
+  field: string;
+  debt: number;
 }
 
 const formatCurrency = (amount: number) => {
   return `Rp ${amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
 };
 
-const KatalogBarang: React.FC = () => {
-  const [sortedData, setSortedData] = useState<Item[]>([]);
+const KatalogCustomer: React.FC = () => {
+  const [sortedData, setSortedData] = useState<Customer[]>([]);
   const [searchText, setSearchText] = useState<string>("");
   const [pageSize, setPageSize] = useState<number>(5);
   const [loading, setLoading] = useState(true);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
   const [form] = Form.useForm();
@@ -37,14 +37,14 @@ const KatalogBarang: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (editingItem) {
-      form.setFieldsValue(editingItem);
+    if (editingCustomer) {
+      form.setFieldsValue(editingCustomer);
     }
-  }, [editingItem, form]);
+  }, [editingCustomer, form]);
 
   const fetchData = async () => {
     try {
-      const response = await fetch("/api/barang/list-barang");
+      const response = await fetch("/api/customer/list-customer");
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -65,22 +65,22 @@ const KatalogBarang: React.FC = () => {
     const { value } = e.target;
     setSearchText(value);
 
-    const filteredData = sortedData.filter((item) =>
-      item.name.toLowerCase().includes(value.toLowerCase()),
+    const filteredData = sortedData.filter((customer) =>
+      customer.name.toLowerCase().includes(value.toLowerCase()),
     );
     setSortedData(filteredData);
   };
 
   // Handle Edit
-  const handleEdit = (item: Item) => {
-    setEditingKey(item.key);
-    setEditingItem(item);
+  const handleEdit = (customer: Customer) => {
+    setEditingKey(customer.key);
+    setEditingCustomer(customer);
     setIsEditModalVisible(true);
   };
 
-  const handleEditSubmit = async (values: Item) => {
+  const handleEditSubmit = async (values: Customer) => {
     try {
-      const response = await fetch(`/api/barang/${editingKey}`, {
+      const response = await fetch(`/api/customer/${editingKey}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -88,13 +88,13 @@ const KatalogBarang: React.FC = () => {
         body: JSON.stringify(values),
       });
       if (response.ok) {
-        message.success("Item updated successfully");
+        message.success("Customer updated successfully");
         fetchData();
       } else {
-        throw new Error("Failed to update item");
+        throw new Error("Failed to update customer");
       }
     } catch (error) {
-      message.error("Failed to update item");
+      message.error("Failed to update customer");
     } finally {
       setIsEditModalVisible(false);
     }
@@ -108,54 +108,42 @@ const KatalogBarang: React.FC = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`/api/barang/${deletingKey}`, {
+      const response = await fetch(`/api/customer/${deletingKey}`, {
         method: "DELETE",
       });
       if (response.ok) {
-        message.success("Item deleted successfully");
+        message.success("Customer deleted successfully");
         fetchData();
       } else {
-        throw new Error("Failed to delete item");
+        throw new Error("Failed to delete customer");
       }
     } catch (error) {
-      message.error("Failed to delete item");
+      message.error("Failed to delete customer");
     } finally {
       setIsDeleteModalVisible(false);
     }
   };
 
-  const columns: ColumnsType<Item> = [
+  const columns: ColumnsType<Customer> = [
     {
-      title: "Nama Barang",
+      title: "Nama Customer",
       dataIndex: "name",
       key: "name",
       sorter: (a, b) => a.name.localeCompare(b.name),
       sortDirections: ["ascend", "descend"],
     },
     {
-      title: "Satuan",
-      dataIndex: "satuan",
-      key: "satuan",
+      title: "Field",
+      dataIndex: "field",
+      key: "field",
     },
     {
-      title: "Harga",
-      dataIndex: "harga",
-      key: "harga",
-      sorter: (a, b) => a.harga - b.harga,
+      title: "Debt",
+      dataIndex: "debt",
+      key: "debt",
+      sorter: (a, b) => a.debt - b.debt,
       sortDirections: ["ascend", "descend"],
       render: (text) => formatCurrency(text),
-    },
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (text) => {
-        const date = new Date(text);
-        const day = String(date.getDate()).padStart(2, "0");
-        const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-indexed
-        const year = String(date.getFullYear()); // Get last two digits of the year
-        return `${day}/${month}/${year}`;
-      },
     },
     {
       title: "Action",
@@ -185,7 +173,7 @@ const KatalogBarang: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl">Katalog Barang</h1>
+      <h1 className="text-3xl">Katalog Customer</h1>
       <div className="flex justify-between md-4">
         <Input
           placeholder="Search by name"
@@ -197,9 +185,9 @@ const KatalogBarang: React.FC = () => {
         <Button
           type="primary"
           icon={<PlusCircleOutlined />}
-          href="/katalog-barang/tambah-katalog"
+          href="/kelola-customer/tambah-customer"
         >
-          Katalog Barang
+          Add Customer
         </Button>
       </div>
       <Table
@@ -216,30 +204,32 @@ const KatalogBarang: React.FC = () => {
       />
       {/* Edit Modal */}
       <Modal
-        title="Edit Item"
+        title="Edit Customer"
         open={isEditModalVisible}
         onCancel={() => setIsEditModalVisible(false)}
         footer={null}
       >
         <Form form={form} onFinish={handleEditSubmit}>
           <Form.Item
-            label="Nama Barang"
+            label="Nama Customer"
             name="name"
-            rules={[{ required: true, message: "Please input the item name!" }]}
+            rules={[
+              { required: true, message: "Please input the customer name!" },
+            ]}
           >
             <Input />
           </Form.Item>
           <Form.Item
-            label="Satuan"
-            name="satuan"
-            rules={[{ required: true, message: "Please input the unit!" }]}
+            label="Field"
+            name="field"
+            rules={[{ required: true, message: "Please input the field!" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
-            label="Harga"
-            name="harga"
-            rules={[{ required: true, message: "Please input the price!" }]}
+            label="Debt"
+            name="debt"
+            rules={[{ required: true, message: "Please input the debt!" }]}
           >
             <Input type="number" />
           </Form.Item>
@@ -265,10 +255,10 @@ const KatalogBarang: React.FC = () => {
         cancelText="Cancel"
         okButtonProps={{ danger: true }}
       >
-        <p>Are you sure you want to delete this item?</p>
+        <p>Are you sure you want to delete this customer?</p>
       </Modal>
     </div>
   );
 };
 
-export default KatalogBarang;
+export default KatalogCustomer;

@@ -9,32 +9,32 @@ import {
   ArrowLeftOutlined,
 } from "@ant-design/icons";
 
-const TambahKatalog: React.FC = () => {
+const TambahCustomer: React.FC = () => {
   const [form] = Form.useForm();
-  const [items, setItems] = useState([{ name: "", satuan: "", harga: "" }]);
+  const [customers, setCustomers] = useState([{ name: "", field: "" }]);
   const [loading, setLoading] = useState(false);
 
-  // Add more items
-  const addItem = () => {
-    setItems([...items, { name: "", satuan: "", harga: "" }]);
+  // Add more customers
+  const addCustomer = () => {
+    setCustomers([...customers, { name: "", field: "" }]);
   };
 
-  // Remove an item
-  const removeItem = (index: number) => {
-    const newItems = items.filter((_, i) => i !== index);
-    setItems(newItems);
+  // Remove a customer
+  const removeCustomer = (index: number) => {
+    const newCustomers = customers.filter((_, i) => i !== index);
+    setCustomers(newCustomers);
   };
 
   // Handle input change
   const handleInputChange = (index: number, field: string, value: string) => {
-    const newItems = [...items];
-    newItems[index] = { ...newItems[index], [field]: value };
-    setItems(newItems);
+    const newCustomers = [...customers];
+    newCustomers[index] = { ...newCustomers[index], [field]: value };
+    setCustomers(newCustomers);
   };
 
   // Reset the form
   const resetForm = () => {
-    setItems([{ name: "", satuan: "", harga: "" }]);
+    setCustomers([{ name: "", field: "" }]);
     form.resetFields();
   };
 
@@ -44,20 +44,20 @@ const TambahKatalog: React.FC = () => {
       await form.validateFields();
       setLoading(true);
 
-      const response = await fetch("/api/barang/tambah-katalog", {
+      const response = await fetch("/api/customer/tambah-customer", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ data: items }),
+        body: JSON.stringify({ data: customers }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save catalog");
+        throw new Error("Failed to save customers");
       }
 
       const result = await response.json();
-      message.success("Catalog successfully saved");
+      message.success("Customers successfully added");
       console.log(result);
 
       resetForm();
@@ -74,68 +74,45 @@ const TambahKatalog: React.FC = () => {
 
   return (
     <div className="p-4">
-      <Card
-        title="Tambah Katalog Barang"
-        className="bg-slate-100"
-        style={{ backgroundColor: "#f1f5f9" }} // Tailwind's bg-slate-100 equivalent
-      >
+      <Card title="Tambah Customer" className="bg-slate-100">
         <Form form={form} layout="vertical">
-          {items.map((item, index) => (
+          {customers.map((customer, index) => (
             <Row
               key={index}
               gutter={16}
               align="middle"
               style={{ marginBottom: 16 }}
             >
-              <Col span={8}>
+              <Col span={10}>
                 <Form.Item
-                  label="Nama Barang"
+                  label="Nama Customer"
                   name={`name-${index}`}
                   rules={[
-                    { required: true, message: "Please input item name!" },
+                    { required: true, message: "Please input customer name!" },
                   ]}
                 >
                   <Input
-                    placeholder="Nama Barang"
-                    value={item.name}
+                    placeholder="Nama Customer"
+                    value={customer.name}
                     onChange={(e) =>
                       handleInputChange(index, "name", e.target.value)
                     }
                   />
                 </Form.Item>
               </Col>
-              <Col span={8}>
+              <Col span={10}>
                 <Form.Item
-                  label="Satuan"
-                  name={`satuan-${index}`}
+                  label="Field"
+                  name={`field-${index}`}
                   rules={[
-                    { required: true, message: "Please input item satuan!" },
+                    { required: true, message: "Please input customer field!" },
                   ]}
                 >
                   <Input
-                    placeholder="Satuan"
-                    value={item.satuan}
+                    placeholder="Field"
+                    value={customer.field}
                     onChange={(e) =>
-                      handleInputChange(index, "satuan", e.target.value)
-                    }
-                  />
-                </Form.Item>
-              </Col>
-              <Col span={4}>
-                <Form.Item
-                  label="Harga"
-                  name={`harga-${index}`}
-                  rules={[
-                    { required: true, message: "Please input item harga!" },
-                  ]}
-                >
-                  <Input
-                    prefix="Rp."
-                    placeholder="Harga"
-                    type="number"
-                    value={item.harga}
-                    onChange={(e) =>
-                      handleInputChange(index, "harga", e.target.value)
+                      handleInputChange(index, "field", e.target.value)
                     }
                   />
                 </Form.Item>
@@ -145,7 +122,7 @@ const TambahKatalog: React.FC = () => {
                   <Button
                     type="text"
                     icon={<MinusCircleOutlined />}
-                    onClick={() => removeItem(index)}
+                    onClick={() => removeCustomer(index)}
                     danger
                   >
                     Remove
@@ -156,8 +133,8 @@ const TambahKatalog: React.FC = () => {
           ))}
 
           <Form.Item>
-            <Button type="dashed" onClick={addItem} icon={<PlusOutlined />}>
-              Add More Item
+            <Button type="dashed" onClick={addCustomer} icon={<PlusOutlined />}>
+              Add More Customer
             </Button>
           </Form.Item>
 
@@ -180,7 +157,7 @@ const TambahKatalog: React.FC = () => {
               </Button>
               <Button
                 type="default"
-                href="/katalog-barang"
+                href="/customers"
                 icon={<ArrowLeftOutlined />}
               >
                 Back
@@ -193,4 +170,4 @@ const TambahKatalog: React.FC = () => {
   );
 };
 
-export default TambahKatalog;
+export default TambahCustomer;

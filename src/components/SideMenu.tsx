@@ -72,6 +72,15 @@ export default function SideMenu() {
               ],
             },
             {
+              key: "usr-demd",
+              label: "Admin & Pelanggan",
+              icon: <UserOutlined style={{ fontSize: 26 }} />,
+              children: [
+                { label: "Kelola Admin", key: "/kelola-admin" },
+                { label: "Kelola Pelanggan", key: "/kelola-customer" },
+              ],
+            },
+            {
               key: "/kelola-admin",
               label: "Kelola admin",
               icon: <UsergroupAddOutlined style={{ fontSize: 26 }} />,

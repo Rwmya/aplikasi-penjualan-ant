@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from "react";
-import { Table, Button, Space, Input } from "antd";
+import React, { useState, useEffect } from "react";
+import { Table, Button, Space, Input, message } from "antd";
 import {
   CloseOutlined,
   EditOutlined,
@@ -12,73 +12,94 @@ import type { ColumnsType } from "antd/es/table";
 
 interface Item {
   key: string;
+  id: number;
   name: string;
-  type: string;
+  satuan: string;
   quantity: number;
 }
 
-const data: Item[] = [
-  { key: "1", name: "Apple", type: "Fruit", quantity: 100 },
-  { key: "2", name: "Banana", type: "Fruit", quantity: 150 },
-  { key: "3", name: "Carrot", type: "Vegetable", quantity: 200 },
-  { key: "4", name: "Doughnut", type: "Pastry", quantity: 50 },
-  { key: "5", name: "Eggplant", type: "Vegetable", quantity: 75 },
-  { key: "6", name: "Fig", type: "Fruit", quantity: 60 },
-  { key: "7", name: "Grape", type: "Fruit", quantity: 120 },
-  { key: "8", name: "Honeydew", type: "Fruit", quantity: 90 },
-  { key: "9", name: "Iceberg Lettuce", type: "Vegetable", quantity: 110 },
-  { key: "10", name: "Jalapeño", type: "Vegetable", quantity: 40 },
-  { key: "11", name: "Kiwi", type: "Fruit", quantity: 85 },
-  { key: "12", name: "Lemon", type: "Fruit", quantity: 70 },
-  { key: "13", name: "Mango", type: "Fruit", quantity: 130 },
-  { key: "14", name: "Nectarine", type: "Fruit", quantity: 95 },
-  { key: "15", name: "Onion", type: "Vegetable", quantity: 150 },
-  { key: "16", name: "Peach", type: "Fruit", quantity: 80 },
-  { key: "17", name: "Quinoa", type: "Grain", quantity: 200 },
-  { key: "18", name: "Radish", type: "Vegetable", quantity: 120 },
-  { key: "19", name: "Spinach", type: "Vegetable", quantity: 140 },
-  { key: "20", name: "Tomato", type: "Fruit", quantity: 160 },
-  { key: "21", name: "Ugli Fruit", type: "Fruit", quantity: 50 },
-  {
-    key: "22",
-    name: "Vanilla Puddinggggggggggggggggggggggggggggg",
-    type: "Dessert",
-    quantity: 30,
-  },
-  { key: "23", name: "Watermelon", type: "Fruit", quantity: 180 },
-  { key: "24", name: "Xigua", type: "Fruit", quantity: 45 },
-  { key: "25", name: "Yam", type: "Vegetable", quantity: 60 },
-  { key: "26", name: "Zucchini", type: "Vegetable", quantity: 70 },
-  { key: "27", name: "Baguette", type: "Bread", quantity: 100 },
-  { key: "28", name: "Croissant", type: "Pastry", quantity: 40 },
-  { key: "29", name: "Pineapple", type: "Fruit", quantity: 90 },
-  { key: "30", name: "Chard", type: "Vegetable", quantity: 150 },
-];
+const StokBarang: React.FC = () => {
+  const [sortedData, setSortedData] = useState<Item[]>([]);
+  const [searchText, setSearchText] = useState<string>("");
+  const [pageSize, setPageSize] = useState<number>(5);
+  const [editingKey, setEditingKey] = useState<string | null>(null);
+  const [count, setCount] = useState<{ [key: string]: number }>({});
+  const [loading, setLoading] = useState(true);
 
-const KatalogBarang: React.FC = () => {
-  const [sortedData, setSortedData] = useState<Item[]>(data);
-  const [searchText, setSearchText] = useState<string>(""); // State for search text
-  const [pageSize, setPageSize] = useState<number>(5); // State for page size
-  const [editingKey, setEditingKey] = useState<string | null>(null); // Track editing row
-  const [count, setCount] = useState(0);
+  useEffect(() => {
+    fetchData();
+  }, []);
 
-  const handleCountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = e.target;
-    setCount(Number(value));
+  const fetchData = async () => {
+    try {
+      const response = await fetch("/api/barang/list-barang");
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const result = await response.json();
+      if (result.success) {
+        setSortedData(result.data);
+      } else {
+        throw new Error(result.error || "Failed to fetch data");
+      }
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+    }
   };
 
-  // Handle search
+  const handleCountChange = (value: number, key: string) => {
+    setCount((prev) => ({ ...prev, [key]: value }));
+  };
+
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target;
     setSearchText(value);
-    const filteredData = data.filter((item) =>
+    const filteredData = sortedData.filter((item) =>
       item.name.toLowerCase().includes(value.toLowerCase()),
     );
     setSortedData(filteredData);
   };
 
   const handleKelolaClick = (key: string) => {
-    setEditingKey(editingKey === key ? null : key); // Toggle editing state for the specific row
+    setEditingKey(editingKey === key ? null : key);
+    setCount((prev) => ({ ...prev, [key]: 0 }));
+  };
+
+  const handleQuantityChange = async (
+    id: number,
+    quantity: number,
+    action: "tambah" | "kurangi",
+  ) => {
+    if (quantity < 1) {
+      message.error("Error jumlah tidak bisa nol");
+      return;
+    }
+    try {
+      console.log(id, quantity, action);
+      const response = await fetch("/api/barang/ubah-stok", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, quantity, action }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update quantity");
+      }
+
+      const result = await response.json();
+      if (result.success) {
+        message.success(
+          `Quantity ${action === "tambah" ? "increased" : "decreased"} successfully`,
+        );
+        fetchData(); // Refresh the data
+      } else {
+        throw new Error(result.error || "Failed to update quantity");
+      }
+    } catch (error) {
+      console.error("Error updating quantity:", error);
+      message.error("Failed to update quantity");
+    }
   };
 
   const columns: ColumnsType<Item> = [
@@ -86,19 +107,19 @@ const KatalogBarang: React.FC = () => {
       title: "Nama barang",
       dataIndex: "name",
       key: "name",
-      sorter: (a, b) => a.name.localeCompare(b.name), // Sorting by name
+      sorter: (a, b) => a.name.localeCompare(b.name),
       sortDirections: ["ascend", "descend"],
     },
     {
-      title: "Tipe barang",
-      dataIndex: "type",
-      key: "type",
+      title: "Satuan",
+      dataIndex: "satuan",
+      key: "satuan",
     },
     {
       title: "Jumlah",
       dataIndex: "quantity",
       key: "quantity",
-      sorter: (a, b) => a.quantity - b.quantity, // Sorting by quantity
+      sorter: (a, b) => a.quantity - b.quantity,
       sortDirections: ["ascend", "descend"],
     },
     {
@@ -111,19 +132,38 @@ const KatalogBarang: React.FC = () => {
               <Input
                 type="number"
                 placeholder="Jumlah"
-                prefix={<EditOutlined />}
-                value={count}
+                value={count[record.key] || 0}
                 min={0}
-                onChange={handleCountChange}
+                onChange={(e) =>
+                  handleCountChange(Number(e.target.value), record.key)
+                }
                 style={{ width: 100 }}
               />
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => {}}>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  handleQuantityChange(
+                    parseInt(record.key),
+                    count[record.key] || 0,
+                    "tambah",
+                  );
+                  handleKelolaClick(record.key);
+                }}
+              >
                 Tambah
               </Button>
               <Button
                 type="primary"
                 icon={<MinusOutlined />}
-                onClick={() => console.log("")}
+                onClick={() => {
+                  handleQuantityChange(
+                    parseInt(record.key),
+                    count[record.key] || 0,
+                    "kurangi",
+                  );
+                  handleKelolaClick(record.key);
+                }}
                 danger
               >
                 Kurangi
@@ -173,10 +213,11 @@ const KatalogBarang: React.FC = () => {
             onShowSizeChange: (_current, size) => setPageSize(size),
           }}
           bordered
+          loading={loading}
         />
       </div>
     </>
   );
 };
 
-export default KatalogBarang;
+export default StokBarang;
