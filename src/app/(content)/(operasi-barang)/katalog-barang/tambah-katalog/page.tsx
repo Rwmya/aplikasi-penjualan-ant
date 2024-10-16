@@ -53,11 +53,11 @@ const TambahKatalog: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to save catalog");
+        throw new Error("Gagal menyimpan Katalog");
       }
 
       const result = await response.json();
-      message.success("Catalog successfully saved");
+      message.success("Berhasil Menyimpan Katalog");
       console.log(result);
 
       resetForm();
@@ -65,7 +65,7 @@ const TambahKatalog: React.FC = () => {
       if (error instanceof Error) {
         message.error(error.message);
       } else {
-        message.error("An unexpected error occurred");
+        message.error("Error");
       }
     } finally {
       setLoading(false);
@@ -91,9 +91,7 @@ const TambahKatalog: React.FC = () => {
                 <Form.Item
                   label="Nama Barang"
                   name={`name-${index}`}
-                  rules={[
-                    { required: true, message: "Please input item name!" },
-                  ]}
+                  rules={[{ required: true, message: "Tolong Input Nama!" }]}
                 >
                   <Input
                     placeholder="Nama Barang"
@@ -108,9 +106,7 @@ const TambahKatalog: React.FC = () => {
                 <Form.Item
                   label="Satuan"
                   name={`satuan-${index}`}
-                  rules={[
-                    { required: true, message: "Please input item satuan!" },
-                  ]}
+                  rules={[{ required: true, message: "Tolong Input satuan!" }]}
                 >
                   <Input
                     placeholder="Satuan"
@@ -125,9 +121,7 @@ const TambahKatalog: React.FC = () => {
                 <Form.Item
                   label="Harga"
                   name={`harga-${index}`}
-                  rules={[
-                    { required: true, message: "Please input item harga!" },
-                  ]}
+                  rules={[{ required: true, message: "Tolong Input harga!" }]}
                 >
                   <Input
                     prefix="Rp."
@@ -148,7 +142,7 @@ const TambahKatalog: React.FC = () => {
                     onClick={() => removeItem(index)}
                     danger
                   >
-                    Remove
+                    Hapus
                   </Button>
                 )}
               </Col>
@@ -157,7 +151,7 @@ const TambahKatalog: React.FC = () => {
 
           <Form.Item>
             <Button type="dashed" onClick={addItem} icon={<PlusOutlined />}>
-              Add More Item
+              Tambah Lebih banyak barang
             </Button>
           </Form.Item>
 
@@ -169,7 +163,7 @@ const TambahKatalog: React.FC = () => {
                 loading={loading}
                 icon={<SaveOutlined />}
               >
-                Save
+                Simpan
               </Button>
               <Button
                 htmlType="button"
@@ -183,7 +177,7 @@ const TambahKatalog: React.FC = () => {
                 href="/katalog-barang"
                 icon={<ArrowLeftOutlined />}
               >
-                Back
+                Kembali
               </Button>
             </Space>
           </Form.Item>

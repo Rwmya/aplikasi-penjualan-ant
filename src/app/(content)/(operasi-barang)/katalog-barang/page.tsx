@@ -146,7 +146,7 @@ const KatalogBarang: React.FC = () => {
       render: (text) => formatCurrency(text),
     },
     {
-      title: "Created At",
+      title: "Ditambahkan pada",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (text) => {
@@ -188,7 +188,7 @@ const KatalogBarang: React.FC = () => {
       <h1 className="text-3xl">Katalog Barang</h1>
       <div className="flex justify-between md-4">
         <Input
-          placeholder="Search by name"
+          placeholder="Search"
           prefix={<SearchOutlined />}
           value={searchText}
           onChange={handleSearch}

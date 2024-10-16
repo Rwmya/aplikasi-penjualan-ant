@@ -11,7 +11,6 @@ import {
   LogoutOutlined,
   ShoppingCartOutlined,
   UserOutlined,
-  UsergroupAddOutlined,
 } from "@ant-design/icons";
 
 interface keys {
@@ -79,16 +78,6 @@ export default function SideMenu() {
                 { label: "Kelola Admin", key: "/kelola-admin" },
                 { label: "Kelola Pelanggan", key: "/kelola-customer" },
               ],
-            },
-            {
-              key: "/kelola-admin",
-              label: "Kelola admin",
-              icon: <UsergroupAddOutlined style={{ fontSize: 26 }} />,
-            },
-            {
-              key: "/profile",
-              label: "Profile",
-              icon: <UserOutlined style={{ fontSize: 26 }} />,
             },
             {
               key: "logout",

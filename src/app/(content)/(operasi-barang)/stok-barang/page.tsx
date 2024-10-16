@@ -201,7 +201,6 @@ const StokBarang: React.FC = () => {
             onChange={handleSearch}
             style={{ width: 200, marginRight: 16 }}
           />
-          <Button type="primary">Tambah Katalog Barang</Button>
         </div>
         <Table
           columns={columns}

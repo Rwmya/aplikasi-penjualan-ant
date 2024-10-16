@@ -9,27 +9,24 @@ import {
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 
-interface Customer {
+interface User {
   key: string;
-  name: string;
-  field: string;
-  debt: number;
+  username: string;
+  password: string; // Include password
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-const formatCurrency = (amount: number) => {
-  return `Rp ${amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
-};
-
-const KatalogCustomer: React.FC = () => {
-  const [sortedData, setSortedData] = useState<Customer[]>([]);
+const KelolaAdmin: React.FC = () => {
+  const [sortedData, setSortedData] = useState<User[]>([]);
   const [searchText, setSearchText] = useState<string>("");
-  const [pageSize, setPageSize] = useState<number>(5);
   const [loading, setLoading] = useState(true);
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -37,14 +34,14 @@ const KatalogCustomer: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (editingCustomer) {
-      form.setFieldsValue(editingCustomer);
+    if (editingUser) {
+      form.setFieldsValue(editingUser);
     }
-  }, [editingCustomer, form]);
+  }, [editingUser, form]);
 
   const fetchData = async () => {
     try {
-      const response = await fetch("/api/customer/list-customer");
+      const response = await fetch("/api/admin/list-admin");
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
@@ -65,26 +62,25 @@ const KatalogCustomer: React.FC = () => {
     const { value } = e.target;
     setSearchText(value);
 
-    const filteredData = sortedData.filter((customer) =>
-      customer.name.toLowerCase().includes(value.toLowerCase()),
+    const filteredData = sortedData.filter((user) =>
+      user.username.toLowerCase().includes(value.toLowerCase()),
     );
     setSortedData(filteredData);
   };
 
-  // Handle Edit
-  const handleEdit = (customer: Customer) => {
-    setEditingKey(customer.key);
-    setEditingCustomer(customer);
+  const handleEdit = (user: User) => {
+    setEditingKey(user.key);
+    setEditingUser(user);
     setIsEditModalVisible(true);
   };
 
-  const handleEditSubmit = async (values: Customer) => {
+  const handleEditSubmit = async (values: User) => {
     const payload = {
-      ...values,
-      debt: Number(values.debt), // Convert debt to a number
+      username: values.username,
+      password: values.password,
     };
     try {
-      const response = await fetch(`/api/customer/${editingKey}`, {
+      const response = await fetch(`/api/admin/${editingKey}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -92,19 +88,18 @@ const KatalogCustomer: React.FC = () => {
         body: JSON.stringify(payload),
       });
       if (response.ok) {
-        message.success("Customer updated successfully");
+        message.success("Admin updated successfully");
         fetchData();
       } else {
-        throw new Error("Failed to update customer");
+        throw new Error("Failed to update admin");
       }
     } catch (error) {
-      message.error("Failed to update customer");
+      message.error("Failed to update admin");
     } finally {
       setIsEditModalVisible(false);
     }
   };
 
-  // Handle delete confirmation modal
   const confirmDelete = (key: string) => {
     setDeletingKey(key);
     setIsDeleteModalVisible(true);
@@ -112,42 +107,69 @@ const KatalogCustomer: React.FC = () => {
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`/api/customer/${deletingKey}`, {
+      const response = await fetch(`/api/admin/${deletingKey}`, {
         method: "DELETE",
       });
       if (response.ok) {
-        message.success("Customer deleted successfully");
+        message.success("Admin deleted successfully");
         fetchData();
       } else {
-        throw new Error("Failed to delete customer");
+        throw new Error("Failed to delete admin");
       }
     } catch (error) {
-      message.error("Failed to delete customer");
+      message.error("Failed to delete admin");
     } finally {
       setIsDeleteModalVisible(false);
     }
   };
 
-  const columns: ColumnsType<Customer> = [
+  // New function to handle adding an admin
+  const handleAddSubmit = async (values: User) => {
+    const payload = {
+      username: values.username,
+      password: values.password,
+    };
+    try {
+      const response = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+      if (response.ok) {
+        message.success("Admin added successfully");
+        fetchData();
+      } else {
+        throw new Error("Failed to add admin");
+      }
+    } catch (error) {
+      message.error("Failed to add admin");
+    } finally {
+      setIsAddModalVisible(false);
+      form.resetFields();
+    }
+  };
+
+  const columns: ColumnsType<User> = [
     {
-      title: "Nama Customer",
-      dataIndex: "name",
-      key: "name",
-      sorter: (a, b) => a.name.localeCompare(b.name),
+      title: "Username",
+      dataIndex: "username",
+      key: "username",
+      sorter: (a, b) => a.username.localeCompare(b.username),
       sortDirections: ["ascend", "descend"],
     },
     {
-      title: "Field",
-      dataIndex: "field",
-      key: "field",
+      title: "Created At",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (text) => new Date(text).toLocaleString(),
     },
     {
-      title: "Debt",
-      dataIndex: "debt",
-      key: "debt",
-      sorter: (a, b) => a.debt - b.debt,
-      sortDirections: ["ascend", "descend"],
-      render: (text) => formatCurrency(text),
+      title: "Updated At",
+      dataIndex: "updatedAt",
+      key: "updatedAt",
+      render: (text) => new Date(text).toLocaleString(),
     },
     {
       title: "Action",
@@ -157,7 +179,6 @@ const KatalogCustomer: React.FC = () => {
           <Button
             type="primary"
             icon={<EditOutlined />}
-            style={{ backgroundColor: "#faad14", borderColor: "#faad14" }}
             onClick={() => handleEdit(record)}
           >
             Edit
@@ -177,10 +198,10 @@ const KatalogCustomer: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl">Katalog Customer</h1>
+      <h1 className="text-3xl">Kelola Admin</h1>
       <div className="flex justify-between md-4">
         <Input
-          placeholder="Search by name"
+          placeholder="Search by username"
           prefix={<SearchOutlined />}
           value={searchText}
           onChange={handleSearch}
@@ -189,53 +210,39 @@ const KatalogCustomer: React.FC = () => {
         <Button
           type="primary"
           icon={<PlusCircleOutlined />}
-          href="/kelola-customer/tambah-customer"
+          onClick={() => setIsAddModalVisible(true)} // Open Add Admin modal
         >
-          Add Customer
+          Add Admin
         </Button>
       </div>
       <Table
         columns={columns}
         dataSource={sortedData}
-        pagination={{
-          pageSize: pageSize,
-          showSizeChanger: true,
-          pageSizeOptions: [5, 10, 15, 20],
-          onShowSizeChange: (_current, size) => setPageSize(size),
-        }}
+        pagination={{ pageSize: 5, showSizeChanger: true }}
         bordered
         loading={loading}
       />
       {/* Edit Modal */}
       <Modal
-        title="Edit Customer"
+        title="Edit Admin"
         open={isEditModalVisible}
         onCancel={() => setIsEditModalVisible(false)}
         footer={null}
       >
         <Form form={form} onFinish={handleEditSubmit}>
           <Form.Item
-            label="Nama Customer"
-            name="name"
-            rules={[
-              { required: true, message: "Please input the customer name!" },
-            ]}
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: "Please input the username!" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
-            label="Field"
-            name="field"
-            rules={[{ required: true, message: "Please input the field!" }]}
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: "Please input the password!" }]}
           >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Debt"
-            name="debt"
-            rules={[{ required: true, message: "Please input the debt!" }]}
-          >
-            <Input type="number" />
+            <Input.Password />
           </Form.Item>
           <Form.Item>
             <Space>
@@ -243,6 +250,40 @@ const KatalogCustomer: React.FC = () => {
                 Save
               </Button>
               <Button onClick={() => setIsEditModalVisible(false)}>
+                Cancel
+              </Button>
+            </Space>
+          </Form.Item>
+        </Form>
+      </Modal>
+      {/* Add Admin Modal */}
+      <Modal
+        title="Add Admin"
+        open={isAddModalVisible}
+        onCancel={() => setIsAddModalVisible(false)}
+        footer={null}
+      >
+        <Form form={form} onFinish={handleAddSubmit}>
+          <Form.Item
+            label="Username"
+            name="username"
+            rules={[{ required: true, message: "Please input the username!" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: "Please input the password!" }]}
+          >
+            <Input.Password />
+          </Form.Item>
+          <Form.Item>
+            <Space>
+              <Button type="primary" htmlType="submit">
+                Add
+              </Button>
+              <Button onClick={() => setIsAddModalVisible(false)}>
                 Cancel
               </Button>
             </Space>
@@ -259,10 +300,10 @@ const KatalogCustomer: React.FC = () => {
         cancelText="Cancel"
         okButtonProps={{ danger: true }}
       >
-        <p>Are you sure you want to delete this customer?</p>
+        <p>Are you sure you want to delete this admin?</p>
       </Modal>
     </div>
   );
 };
 
-export default KatalogCustomer;
+export default KelolaAdmin;

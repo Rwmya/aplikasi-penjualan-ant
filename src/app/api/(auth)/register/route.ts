@@ -3,11 +3,6 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// export async function GET() {
-//   await prisma.user.deleteMany();
-//   return NextResponse.json({ message: "tabel user berhasil dikosongkan" });
-// }
-
 export async function POST(req: Request) {
   try {
     const userData = await req.json();

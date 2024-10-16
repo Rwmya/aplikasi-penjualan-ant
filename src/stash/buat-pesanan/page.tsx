@@ -1,15 +1,6 @@
 "use client";
 import React, { useState, useCallback, useEffect } from "react";
-import {
-  Form,
-  Select,
-  InputNumber,
-  Button,
-  Typography,
-  Row,
-  Col,
-  message,
-} from "antd"; // Import message from antd
+import { Form, Select, InputNumber, Button, Typography, Row, Col } from "antd";
 import {
   DeleteOutlined,
   ShoppingCartOutlined,
@@ -22,6 +13,19 @@ import Link from "next/link";
 const { Option } = Select;
 const { Title } = Typography;
 
+// Mock data
+const customers = [
+  { id: 1, name: "Customer 1" },
+  { id: 2, name: "Customer 2" },
+  { id: 3, name: "Customer 3" },
+];
+
+const items = [
+  { id: 1, namaBarang: "Item 1", harga: 10000 },
+  { id: 2, namaBarang: "Item 2", harga: 20000 },
+  { id: 3, namaBarang: "Item 3", harga: 30000 },
+];
+
 interface OrderItem {
   itemId: number | null;
   quantity: number;
@@ -33,68 +37,25 @@ interface FormValues {
   orderItems: OrderItem[];
 }
 
-interface Customer {
-  key: number;
-  name: string;
-}
-
-interface Item {
-  key: number;
-  name: string;
-  harga: number; // Assuming each item has a price
-}
-
 const PlaceOrderPage: React.FC = () => {
   const [form] = Form.useForm<FormValues>();
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([
+    { itemId: null, quantity: 1 },
+  ]);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [items, setItems] = useState<Item[]>([]);
 
-  // Fetch items from API
-  const fetchItems = async () => {
-    try {
-      const res = await fetch("/api/barang/list-barang");
-      const data = await res.json();
-      if (data.success) {
-        setItems(data.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch items:", error);
-    }
-  };
-
-  // Fetch customers from API
-  const fetchCustomers = async () => {
-    try {
-      const res = await fetch("/api/customer/list-customer");
-      const data = await res.json();
-      if (data.success) {
-        setCustomers(data.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch customers:", error);
-    }
-  };
-
-  // Calculate total price
   const calculateTotalPrice = useCallback(() => {
     const formValues = form.getFieldsValue();
     const total =
       formValues.orderItems?.reduce((sum, item) => {
         if (item && item.itemId !== null && item.quantity !== null) {
-          const itemPrice =
-            items.find((i) => i.key === item.itemId)?.harga || 0;
+          const itemPrice = items.find((i) => i.id === item.itemId)?.harga || 0;
           return sum + itemPrice * item.quantity;
         }
         return sum;
       }, 0) || 0;
     setTotalPrice(total);
-  }, [form, items]);
-
-  useEffect(() => {
-    fetchItems();
-    fetchCustomers();
-  }, []);
+  }, [form]);
 
   useEffect(() => {
     calculateTotalPrice();
@@ -104,49 +65,26 @@ const PlaceOrderPage: React.FC = () => {
     calculateTotalPrice();
   };
 
-  const handlePlaceOrder = async (values: FormValues) => {
-    try {
-      // Prepare the payload
-      const payload = {
-        customerId: Number(values.customerId),
-        transactionType: values.transactionType,
-        orderItems: values.orderItems.map((item) => {
-          const selectedItem = items.find((i) => i.key === item.itemId);
-          return {
-            itemId: Number(item.itemId),
-            quantity: item.quantity,
-            harga: selectedItem ? selectedItem.harga : 0, // Ensure price is included
-          };
-        }),
-      };
+  const handleAddItem = () => {
+    setOrderItems([...orderItems, { itemId: null, quantity: 1 }]);
+  };
 
-      // Send the payload to the API
-      const response = await fetch("/api/transaksi/buat-pesanan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+  const handleRemoveItem = (index: number) => {
+    const newItems = [...orderItems];
+    newItems.splice(index, 1);
+    setOrderItems(newItems);
+    form.setFieldsValue({ orderItems: newItems });
+    calculateTotalPrice();
+  };
 
-      // Handle the API response
-      const result = await response.json();
-      if (result.success) {
-        message.success("Pesanan berhasil dibuat!"); // Success message
-        handleReset();
-        console.log("Transaction placed successfully:", result.transaction);
-      } else {
-        message.error(`Error placing transaction: ${result.error}`); // Error message
-        console.error("Error placing transaction:", result.error);
-      }
-    } catch (error) {
-      message.error("Terjadi kesalahan saat membuat pesanan."); // General error message
-      console.error("Error during place order:", error);
-    }
+  const handlePlaceOrder = (values: FormValues) => {
+    console.log("Form values:", values);
+    console.log("Total price:", totalPrice);
   };
 
   const handleReset = () => {
     form.resetFields();
+    setOrderItems([{ itemId: null, quantity: 1 }]);
     setTotalPrice(0);
   };
 
@@ -177,7 +115,7 @@ const PlaceOrderPage: React.FC = () => {
                 }
               >
                 {customers.map((customer) => (
-                  <Option key={customer.key} value={customer.key}>
+                  <Option key={customer.id} value={customer.id}>
                     {customer.name}
                   </Option>
                 ))}
@@ -200,10 +138,7 @@ const PlaceOrderPage: React.FC = () => {
           </Col>
         </Row>
 
-        <Form.List
-          name="orderItems"
-          initialValue={[{ itemId: null, quantity: 1 }]}
-        >
+        <Form.List name="orderItems" initialValue={orderItems}>
           {(fields, { add, remove }) => (
             <>
               {fields.map((field, index) => (
@@ -225,8 +160,8 @@ const PlaceOrderPage: React.FC = () => {
                       }
                     >
                       {items.map((i) => (
-                        <Option key={i.key} value={i.key}>
-                          {i.name}
+                        <Option key={i.id} value={i.id}>
+                          {i.namaBarang}
                         </Option>
                       ))}
                     </Select>
@@ -248,8 +183,8 @@ const PlaceOrderPage: React.FC = () => {
                       danger
                       icon={<DeleteOutlined />}
                       onClick={() => {
-                        remove(field.name); // This removes the field from the form list
-                        calculateTotalPrice(); // Recalculate total price
+                        remove(field.name);
+                        handleRemoveItem(index);
                       }}
                     >
                       Hapus
@@ -259,7 +194,8 @@ const PlaceOrderPage: React.FC = () => {
               ))}
               <Button
                 onClick={() => {
-                  add(); // Add new item
+                  add();
+                  handleAddItem();
                 }}
                 className="mb-4"
                 icon={<PlusOutlined />}

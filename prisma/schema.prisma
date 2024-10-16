@@ -14,9 +14,11 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
-  password String
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
 }
 
 model Customer {
@@ -24,6 +26,7 @@ model Customer {
   name         String        @unique
   field        String
   debt         Int           @default(0) // Track the customer's debt
+  createdAt    DateTime      @default(now())
   transactions Transaction[] // Relation to Transaction
 }
 
@@ -31,6 +34,7 @@ model Transaction {
   id         Int               @id @default(autoincrement())
   customerId Int // Foreign key to associate the transaction with a customer
   date       DateTime          @default(now()) // Timestamp for the transaction
+  amount     Int
   isPaid     Boolean           @default(false) // Track if the transaction is paid
   customer   Customer          @relation(fields: [customerId], references: [id]) // Relation to Customer
   items      TransactionItem[] // Relation to TransactionItem

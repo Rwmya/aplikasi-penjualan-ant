@@ -1,15 +1,6 @@
 "use client";
 import React, { useState, useCallback, useEffect } from "react";
-import {
-  Form,
-  Select,
-  InputNumber,
-  Button,
-  Typography,
-  Row,
-  Col,
-  message,
-} from "antd"; // Import message from antd
+import { Form, Select, InputNumber, Button, Typography, Row, Col } from "antd";
 import {
   DeleteOutlined,
   ShoppingCartOutlined,
@@ -33,22 +24,14 @@ interface FormValues {
   orderItems: OrderItem[];
 }
 
-interface Customer {
-  key: number;
-  name: string;
-}
-
-interface Item {
-  key: number;
-  name: string;
-  harga: number; // Assuming each item has a price
-}
-
 const PlaceOrderPage: React.FC = () => {
   const [form] = Form.useForm<FormValues>();
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([
+    { itemId: null, quantity: 1 },
+  ]);
   const [totalPrice, setTotalPrice] = useState(0);
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [items, setItems] = useState<Item[]>([]);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
 
   // Fetch items from API
   const fetchItems = async () => {
@@ -104,49 +87,26 @@ const PlaceOrderPage: React.FC = () => {
     calculateTotalPrice();
   };
 
-  const handlePlaceOrder = async (values: FormValues) => {
-    try {
-      // Prepare the payload
-      const payload = {
-        customerId: Number(values.customerId),
-        transactionType: values.transactionType,
-        orderItems: values.orderItems.map((item) => {
-          const selectedItem = items.find((i) => i.key === item.itemId);
-          return {
-            itemId: Number(item.itemId),
-            quantity: item.quantity,
-            harga: selectedItem ? selectedItem.harga : 0, // Ensure price is included
-          };
-        }),
-      };
+  const handleAddItem = () => {
+    setOrderItems([...orderItems, { itemId: null, quantity: 1 }]);
+  };
 
-      // Send the payload to the API
-      const response = await fetch("/api/transaksi/buat-pesanan", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+  const handleRemoveItem = (index: number) => {
+    const newItems = [...orderItems];
+    newItems.splice(index, 1);
+    setOrderItems(newItems);
+    form.setFieldsValue({ orderItems: newItems });
+    calculateTotalPrice();
+  };
 
-      // Handle the API response
-      const result = await response.json();
-      if (result.success) {
-        message.success("Pesanan berhasil dibuat!"); // Success message
-        handleReset();
-        console.log("Transaction placed successfully:", result.transaction);
-      } else {
-        message.error(`Error placing transaction: ${result.error}`); // Error message
-        console.error("Error placing transaction:", result.error);
-      }
-    } catch (error) {
-      message.error("Terjadi kesalahan saat membuat pesanan."); // General error message
-      console.error("Error during place order:", error);
-    }
+  const handlePlaceOrder = (values: FormValues) => {
+    console.log("Form values:", values);
+    console.log("Total price:", totalPrice);
   };
 
   const handleReset = () => {
     form.resetFields();
+    setOrderItems([{ itemId: null, quantity: 1 }]);
     setTotalPrice(0);
   };
 
@@ -200,10 +160,7 @@ const PlaceOrderPage: React.FC = () => {
           </Col>
         </Row>
 
-        <Form.List
-          name="orderItems"
-          initialValue={[{ itemId: null, quantity: 1 }]}
-        >
+        <Form.List name="orderItems" initialValue={orderItems}>
           {(fields, { add, remove }) => (
             <>
               {fields.map((field, index) => (
@@ -248,8 +205,8 @@ const PlaceOrderPage: React.FC = () => {
                       danger
                       icon={<DeleteOutlined />}
                       onClick={() => {
-                        remove(field.name); // This removes the field from the form list
-                        calculateTotalPrice(); // Recalculate total price
+                        remove(field.name);
+                        handleRemoveItem(index);
                       }}
                     >
                       Hapus
@@ -259,7 +216,8 @@ const PlaceOrderPage: React.FC = () => {
               ))}
               <Button
                 onClick={() => {
-                  add(); // Add new item
+                  add();
+                  handleAddItem();
                 }}
                 className="mb-4"
                 icon={<PlusOutlined />}
