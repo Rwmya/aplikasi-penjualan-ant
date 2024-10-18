@@ -46,16 +46,16 @@ const KatalogCustomer: React.FC = () => {
     try {
       const response = await fetch("/api/customer/list-customer");
       if (!response.ok) {
-        throw new Error("Failed to fetch data");
+        throw new Error("Gagal mengambil data");
       }
       const result = await response.json();
       if (result.success) {
         setSortedData(result.data);
       } else {
-        throw new Error(result.error || "Failed to fetch data");
+        throw new Error(result.error || "Gagal mengambil data");
       }
     } catch (error) {
-      message.error("Failed to fetch data");
+      message.error("Gagal mengambil data");
     } finally {
       setLoading(false);
     }
@@ -92,13 +92,13 @@ const KatalogCustomer: React.FC = () => {
         body: JSON.stringify(payload),
       });
       if (response.ok) {
-        message.success("Customer updated successfully");
+        message.success("Data pelanggan berhasil diperbarui");
         fetchData();
       } else {
-        throw new Error("Failed to update customer");
+        throw new Error("Data pelanggan berhasil diperbarui");
       }
     } catch (error) {
-      message.error("Failed to update customer");
+      message.error("Gagal memperbarui data pelanggan");
     } finally {
       setIsEditModalVisible(false);
     }
@@ -116,13 +116,13 @@ const KatalogCustomer: React.FC = () => {
         method: "DELETE",
       });
       if (response.ok) {
-        message.success("Customer deleted successfully");
+        message.success("Pelanggan berhasil dihapus");
         fetchData();
       } else {
-        throw new Error("Failed to delete customer");
+        throw new Error("Pelanggan berhasil dihapus");
       }
     } catch (error) {
-      message.error("Failed to delete customer");
+      message.error("Gagal menghapus pelanggan");
     } finally {
       setIsDeleteModalVisible(false);
     }
@@ -137,12 +137,12 @@ const KatalogCustomer: React.FC = () => {
       sortDirections: ["ascend", "descend"],
     },
     {
-      title: "Field",
+      title: "Bidang",
       dataIndex: "field",
       key: "field",
     },
     {
-      title: "Debt",
+      title: "Hutang",
       dataIndex: "debt",
       key: "debt",
       sorter: (a, b) => a.debt - b.debt,
@@ -150,7 +150,7 @@ const KatalogCustomer: React.FC = () => {
       render: (text) => formatCurrency(text),
     },
     {
-      title: "Action",
+      title: "Aksi",
       key: "action",
       render: (_, record) => (
         <Space size="middle">
@@ -168,7 +168,7 @@ const KatalogCustomer: React.FC = () => {
             icon={<DeleteOutlined />}
             onClick={() => confirmDelete(record.key)}
           >
-            Delete
+            Hapus
           </Button>
         </Space>
       ),
@@ -177,10 +177,10 @@ const KatalogCustomer: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl">Katalog Customer</h1>
+      <h1 className="text-3xl">Kelola Pelanggan</h1>
       <div className="flex justify-between md-4">
         <Input
-          placeholder="Search by name"
+          placeholder="Search"
           prefix={<SearchOutlined />}
           value={searchText}
           onChange={handleSearch}
@@ -191,7 +191,7 @@ const KatalogCustomer: React.FC = () => {
           icon={<PlusCircleOutlined />}
           href="/kelola-customer/tambah-customer"
         >
-          Add Customer
+          Tambah Pelanggan
         </Button>
       </div>
       <Table
@@ -218,7 +218,7 @@ const KatalogCustomer: React.FC = () => {
             label="Nama Customer"
             name="name"
             rules={[
-              { required: true, message: "Please input the customer name!" },
+              { required: true, message: "Tolong isi nama pelanggan!" },
             ]}
           >
             <Input />
@@ -226,24 +226,24 @@ const KatalogCustomer: React.FC = () => {
           <Form.Item
             label="Field"
             name="field"
-            rules={[{ required: true, message: "Please input the field!" }]}
+            rules={[{ required: true, message: "Tolong input bidang pelanggan!" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             label="Debt"
             name="debt"
-            rules={[{ required: true, message: "Please input the debt!" }]}
+            rules={[{ required: true, message: "tolong input hutang pelanggan!" }]}
           >
             <Input type="number" />
           </Form.Item>
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit">
-                Save
+                Simpan
               </Button>
               <Button onClick={() => setIsEditModalVisible(false)}>
-                Cancel
+                Batal
               </Button>
             </Space>
           </Form.Item>
@@ -251,15 +251,15 @@ const KatalogCustomer: React.FC = () => {
       </Modal>
       {/* Delete Confirmation Modal */}
       <Modal
-        title="Confirm Deletion"
+        title="Konfirmasi Hapus"
         open={isDeleteModalVisible}
         onOk={handleDelete}
         onCancel={() => setIsDeleteModalVisible(false)}
-        okText="Delete"
-        cancelText="Cancel"
+        okText="Hapus"
+        cancelText="Batal"
         okButtonProps={{ danger: true }}
       >
-        <p>Are you sure you want to delete this customer?</p>
+        <p>Apa anda yakin ingin menghapus pelanggan ini?</p>
       </Modal>
     </div>
   );

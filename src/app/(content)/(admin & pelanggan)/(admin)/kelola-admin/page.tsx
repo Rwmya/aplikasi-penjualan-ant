@@ -43,16 +43,16 @@ const KelolaAdmin: React.FC = () => {
     try {
       const response = await fetch("/api/admin/list-admin");
       if (!response.ok) {
-        throw new Error("Failed to fetch data");
+        throw new Error("Gagal mengambil data");
       }
       const result = await response.json();
       if (result.success) {
         setSortedData(result.data);
       } else {
-        throw new Error(result.error || "Failed to fetch data");
+        throw new Error(result.error || "Gagal mengambil data");
       }
     } catch (error) {
-      message.error("Failed to fetch data");
+      message.error("Gagal mengambil data");
     } finally {
       setLoading(false);
     }
@@ -88,13 +88,13 @@ const KelolaAdmin: React.FC = () => {
         body: JSON.stringify(payload),
       });
       if (response.ok) {
-        message.success("Admin updated successfully");
+        message.success("Data admin berhasil diperbarui");
         fetchData();
       } else {
-        throw new Error("Failed to update admin");
+        throw new Error("Gagal memperbarui data admin");
       }
     } catch (error) {
-      message.error("Failed to update admin");
+      message.error("Gagal memperbarui data admin");
     } finally {
       setIsEditModalVisible(false);
     }
@@ -111,13 +111,13 @@ const KelolaAdmin: React.FC = () => {
         method: "DELETE",
       });
       if (response.ok) {
-        message.success("Admin deleted successfully");
+        message.success("Admin berhasil dihapus");
         fetchData();
       } else {
-        throw new Error("Failed to delete admin");
+        throw new Error("Gagal menghapus admin");
       }
     } catch (error) {
-      message.error("Failed to delete admin");
+      message.error("Gagal menghapus admin");
     } finally {
       setIsDeleteModalVisible(false);
     }
@@ -138,13 +138,13 @@ const KelolaAdmin: React.FC = () => {
         body: JSON.stringify(payload),
       });
       if (response.ok) {
-        message.success("Admin added successfully");
+        message.success("Admin berhasil ditambahkan");
         fetchData();
       } else {
-        throw new Error("Failed to add admin");
+        throw new Error("Gagal menambah admin");
       }
     } catch (error) {
-      message.error("Failed to add admin");
+      message.error("Gagal menambah admin");
     } finally {
       setIsAddModalVisible(false);
       form.resetFields();
@@ -160,19 +160,19 @@ const KelolaAdmin: React.FC = () => {
       sortDirections: ["ascend", "descend"],
     },
     {
-      title: "Created At",
+      title: "Dibuat pada",
       dataIndex: "createdAt",
       key: "createdAt",
       render: (text) => new Date(text).toLocaleString(),
     },
     {
-      title: "Updated At",
+      title: "diubah pada",
       dataIndex: "updatedAt",
       key: "updatedAt",
       render: (text) => new Date(text).toLocaleString(),
     },
     {
-      title: "Action",
+      title: "aksi",
       key: "action",
       render: (_, record) => (
         <Space size="middle">
@@ -189,7 +189,7 @@ const KelolaAdmin: React.FC = () => {
             icon={<DeleteOutlined />}
             onClick={() => confirmDelete(record.key)}
           >
-            Delete
+            Hapus
           </Button>
         </Space>
       ),
@@ -201,7 +201,7 @@ const KelolaAdmin: React.FC = () => {
       <h1 className="text-3xl">Kelola Admin</h1>
       <div className="flex justify-between md-4">
         <Input
-          placeholder="Search by username"
+          placeholder="Search"
           prefix={<SearchOutlined />}
           value={searchText}
           onChange={handleSearch}
@@ -212,7 +212,7 @@ const KelolaAdmin: React.FC = () => {
           icon={<PlusCircleOutlined />}
           onClick={() => setIsAddModalVisible(true)} // Open Add Admin modal
         >
-          Add Admin
+          Tambah admin
         </Button>
       </div>
       <Table
@@ -233,24 +233,24 @@ const KelolaAdmin: React.FC = () => {
           <Form.Item
             label="Username"
             name="username"
-            rules={[{ required: true, message: "Please input the username!" }]}
+            rules={[{ required: true, message: "Tolong isi username!" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             label="Password"
             name="password"
-            rules={[{ required: true, message: "Please input the password!" }]}
+            rules={[{ required: true, message: "Tolong isi password!" }]}
           >
             <Input.Password />
           </Form.Item>
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit">
-                Save
+                Simpan
               </Button>
               <Button onClick={() => setIsEditModalVisible(false)}>
-                Cancel
+                Batal
               </Button>
             </Space>
           </Form.Item>
@@ -258,7 +258,7 @@ const KelolaAdmin: React.FC = () => {
       </Modal>
       {/* Add Admin Modal */}
       <Modal
-        title="Add Admin"
+        title="Tambah Admin"
         open={isAddModalVisible}
         onCancel={() => setIsAddModalVisible(false)}
         footer={null}
@@ -267,24 +267,24 @@ const KelolaAdmin: React.FC = () => {
           <Form.Item
             label="Username"
             name="username"
-            rules={[{ required: true, message: "Please input the username!" }]}
+            rules={[{ required: true, message: "Tolong input username!" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             label="Password"
             name="password"
-            rules={[{ required: true, message: "Please input the password!" }]}
+            rules={[{ required: true, message: "Tolong input password!" }]}
           >
             <Input.Password />
           </Form.Item>
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit">
-                Add
+                Tambah Admin
               </Button>
               <Button onClick={() => setIsAddModalVisible(false)}>
-                Cancel
+                Batal
               </Button>
             </Space>
           </Form.Item>
@@ -292,15 +292,15 @@ const KelolaAdmin: React.FC = () => {
       </Modal>
       {/* Delete Confirmation Modal */}
       <Modal
-        title="Confirm Deletion"
+        title="Konfirmasi hapus"
         open={isDeleteModalVisible}
         onOk={handleDelete}
         onCancel={() => setIsDeleteModalVisible(false)}
-        okText="Delete"
-        cancelText="Cancel"
+        okText="Hapus"
+        cancelText="Batal"
         okButtonProps={{ danger: true }}
       >
-        <p>Are you sure you want to delete this admin?</p>
+        <p>Apa anda yakin ingin menghapus admin ini?</p>
       </Modal>
     </div>
   );

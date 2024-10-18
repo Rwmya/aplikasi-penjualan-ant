@@ -66,7 +66,7 @@ export default function SideMenu() {
               label: "Laporan",
               icon: <FileTextOutlined style={{ fontSize: 26 }} />,
               children: [
-                { label: "Laporan stock barang", key: "/laporan-stok-barang" },
+                { label: "Laporan barang", key: "/laporan-barang" },
                 { label: "Laporan transaksi", key: "/laporan-transaksi" },
               ],
             },

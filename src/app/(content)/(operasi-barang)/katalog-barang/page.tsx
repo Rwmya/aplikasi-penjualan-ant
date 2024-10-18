@@ -46,16 +46,16 @@ const KatalogBarang: React.FC = () => {
     try {
       const response = await fetch("/api/barang/list-barang");
       if (!response.ok) {
-        throw new Error("Failed to fetch data");
+        throw new Error("Gagal mengambil data");
       }
       const result = await response.json();
       if (result.success) {
         setSortedData(result.data);
       } else {
-        throw new Error(result.error || "Failed to fetch data");
+        throw new Error(result.error || "Gagal mengambil data");
       }
     } catch (error) {
-      message.error("Failed to fetch data");
+      message.error("Gagal mengambil data");
     } finally {
       setLoading(false);
     }
@@ -88,13 +88,13 @@ const KatalogBarang: React.FC = () => {
         body: JSON.stringify(values),
       });
       if (response.ok) {
-        message.success("Item updated successfully");
+        message.success("Barang sukses diperbarui");
         fetchData();
       } else {
-        throw new Error("Failed to update item");
+        throw new Error("Gagal memperbarui barang");
       }
     } catch (error) {
-      message.error("Failed to update item");
+      message.error("Gagal memperbarui barang");
     } finally {
       setIsEditModalVisible(false);
     }
@@ -112,13 +112,13 @@ const KatalogBarang: React.FC = () => {
         method: "DELETE",
       });
       if (response.ok) {
-        message.success("Item deleted successfully");
+        message.success("Barang berhasil dihapus");
         fetchData();
       } else {
-        throw new Error("Failed to delete item");
+        throw new Error("Gagal menghapus barang");
       }
     } catch (error) {
-      message.error("Failed to delete item");
+      message.error("Gagal menghapus barang");
     } finally {
       setIsDeleteModalVisible(false);
     }
@@ -158,7 +158,7 @@ const KatalogBarang: React.FC = () => {
       },
     },
     {
-      title: "Action",
+      title: "Aksi",
       key: "action",
       render: (_, record) => (
         <Space size="middle">
@@ -176,7 +176,7 @@ const KatalogBarang: React.FC = () => {
             icon={<DeleteOutlined />}
             onClick={() => confirmDelete(record.key)}
           >
-            Delete
+            Hapus
           </Button>
         </Space>
       ),
@@ -216,7 +216,7 @@ const KatalogBarang: React.FC = () => {
       />
       {/* Edit Modal */}
       <Modal
-        title="Edit Item"
+        title="Edit barang"
         open={isEditModalVisible}
         onCancel={() => setIsEditModalVisible(false)}
         footer={null}
@@ -225,31 +225,31 @@ const KatalogBarang: React.FC = () => {
           <Form.Item
             label="Nama Barang"
             name="name"
-            rules={[{ required: true, message: "Please input the item name!" }]}
+            rules={[{ required: true, message: "Tolong masukan nama barang!" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             label="Satuan"
             name="satuan"
-            rules={[{ required: true, message: "Please input the unit!" }]}
+            rules={[{ required: true, message: "Tolong masukan satuan!" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             label="Harga"
             name="harga"
-            rules={[{ required: true, message: "Please input the price!" }]}
+            rules={[{ required: true, message: "Tolong masukan harga!" }]}
           >
             <Input type="number" />
           </Form.Item>
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit">
-                Save
+                Simpan
               </Button>
               <Button onClick={() => setIsEditModalVisible(false)}>
-                Cancel
+                Batal
               </Button>
             </Space>
           </Form.Item>
@@ -257,15 +257,15 @@ const KatalogBarang: React.FC = () => {
       </Modal>
       {/* Delete Confirmation Modal */}
       <Modal
-        title="Confirm Deletion"
+        title="Konfirmasi Hapus"
         open={isDeleteModalVisible}
         onOk={handleDelete}
         onCancel={() => setIsDeleteModalVisible(false)}
-        okText="Delete"
-        cancelText="Cancel"
+        okText="Hapus"
+        cancelText="Batal"
         okButtonProps={{ danger: true }}
       >
-        <p>Are you sure you want to delete this item?</p>
+        <p>Apakah anda yakin akan menghapus barang ini?</p>
       </Modal>
     </div>
   );

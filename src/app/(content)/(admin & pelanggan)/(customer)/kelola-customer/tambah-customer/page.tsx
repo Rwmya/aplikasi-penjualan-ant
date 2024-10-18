@@ -74,7 +74,7 @@ const TambahCustomer: React.FC = () => {
 
   return (
     <div className="p-4">
-      <Card title="Tambah Customer" className="bg-slate-100">
+      <Card title="Tambah Pelanggan" className="bg-slate-100">
         <Form form={form} layout="vertical">
           {customers.map((customer, index) => (
             <Row
@@ -85,14 +85,14 @@ const TambahCustomer: React.FC = () => {
             >
               <Col span={10}>
                 <Form.Item
-                  label="Nama Customer"
+                  label="Nama Pelanggan"
                   name={`name-${index}`}
                   rules={[
-                    { required: true, message: "Please input customer name!" },
+                    { required: true, message: "Tolong isi nama pelanggan!" },
                   ]}
                 >
                   <Input
-                    placeholder="Nama Customer"
+                    placeholder="Nama Pelanggan"
                     value={customer.name}
                     onChange={(e) =>
                       handleInputChange(index, "name", e.target.value)
@@ -102,14 +102,14 @@ const TambahCustomer: React.FC = () => {
               </Col>
               <Col span={10}>
                 <Form.Item
-                  label="Field"
+                  label="Bidang"
                   name={`field-${index}`}
                   rules={[
-                    { required: true, message: "Please input customer field!" },
+                    { required: true, message: "Tolong input bidang pelanggan" },
                   ]}
                 >
                   <Input
-                    placeholder="Field"
+                    placeholder="bidang"
                     value={customer.field}
                     onChange={(e) =>
                       handleInputChange(index, "field", e.target.value)
@@ -125,7 +125,7 @@ const TambahCustomer: React.FC = () => {
                     onClick={() => removeCustomer(index)}
                     danger
                   >
-                    Remove
+                    Hapus
                   </Button>
                 )}
               </Col>
@@ -134,7 +134,7 @@ const TambahCustomer: React.FC = () => {
 
           <Form.Item>
             <Button type="dashed" onClick={addCustomer} icon={<PlusOutlined />}>
-              Add More Customer
+              Tambah Lebih Banyak Pelanggan
             </Button>
           </Form.Item>
 
@@ -146,7 +146,7 @@ const TambahCustomer: React.FC = () => {
                 loading={loading}
                 icon={<SaveOutlined />}
               >
-                Save
+                Simpan
               </Button>
               <Button
                 htmlType="button"
@@ -157,10 +157,10 @@ const TambahCustomer: React.FC = () => {
               </Button>
               <Button
                 type="default"
-                href="/customers"
+                href="/kelola-customer"
                 icon={<ArrowLeftOutlined />}
               >
-                Back
+                Kembali
               </Button>
             </Space>
           </Form.Item>
