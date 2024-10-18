@@ -3,39 +3,25 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Helper function to get date in GMT+7
-const getGMT7Date = (date) => {
-  return new Date(date.getTime() + 7 * 60 * 60 * 1000);
+// Helper function to get date ranges for today, this week, and this month
+const getDateRanges = () => {
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0); // Start of today
+
+  const todayEnd = new Date();
+  todayEnd.setHours(23, 59, 59, 999); // End of today
+
+  const weekStart = new Date(todayStart);
+  weekStart.setDate(todayStart.getDate() - todayStart.getDay()); // Start of this week (Sunday)
+
+  const monthStart = new Date(todayStart.getFullYear(), todayStart.getMonth(), 1); // Start of this month
+
+  return { todayStart, todayEnd, weekStart, monthStart };
 };
 
 export async function GET() {
   try {
-    // Get current date in GMT+7
-    const now = getGMT7Date(new Date());
-
-    // Calculate start and end of day in GMT+7
-    const startOfDay = new Date(
-      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
-    );
-    startOfDay.setUTCHours(startOfDay.getUTCHours() - 7); // Adjust for GMT+7
-    const endOfDay = new Date(startOfDay);
-    endOfDay.setUTCDate(endOfDay.getUTCDate() + 1);
-
-    // Calculate start and end of week in GMT+7
-    const startOfWeek = new Date(startOfDay);
-    startOfWeek.setUTCDate(startOfWeek.getUTCDate() - startOfWeek.getUTCDay());
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setUTCDate(endOfWeek.getUTCDate() + 7);
-
-    // Calculate start and end of month in GMT+7
-    const startOfMonth = new Date(
-      Date.UTC(now.getFullYear(), now.getMonth(), 1),
-    );
-    startOfMonth.setUTCHours(startOfMonth.getUTCHours() - 7); // Adjust for GMT+7
-    const endOfMonth = new Date(
-      Date.UTC(now.getFullYear(), now.getMonth() + 1, 1),
-    );
-    endOfMonth.setUTCHours(endOfMonth.getUTCHours() - 7); // Adjust for GMT+7
+    const { todayStart, todayEnd, weekStart, monthStart } = getDateRanges();
 
     // Recent transactions
     const recentTransactions = await prisma.transaction.findMany({
@@ -67,78 +53,76 @@ export async function GET() {
       take: 5,
     });
 
-    // Get unique customer IDs for today's transactions
-    const uniqueCustomers = await prisma.transaction.findMany({
+    // Total customers today based on transactions (ignoring duplicates)
+    const totalCustomersToday = await prisma.transaction.findMany({
       where: {
         date: {
-          gte: startOfDay,
-          lt: endOfDay,
+          gte: todayStart,
+          lte: todayEnd,
         },
       },
-      distinct: ["customerId"],
       select: {
         customerId: true,
       },
+      distinct: ['customerId'],
     });
 
-    const totalCustomers = uniqueCustomers.length;
-
-    // Count new customers created today
-    const newCustomers = await prisma.customer.count({
+    // New customers today
+    const newCustomersToday = await prisma.customer.count({
       where: {
         createdAt: {
-          gte: startOfDay,
-          lt: startOfDay,
+          gte: todayStart,
+          lte: todayEnd,
         },
       },
     });
 
-    // Count total transactions for today
-    const totalTransactions = await prisma.transaction.count({
+    // Total transactions today
+    const totalTransactionsToday = await prisma.transaction.count({
       where: {
         date: {
-          gte: startOfDay,
-          lt: endOfDay,
+          gte: todayStart,
+          lte: todayEnd,
         },
       },
     });
 
-    // Calculate daily revenue
-    const dailyRevenue = await prisma.transaction.aggregate({
+    // Today's revenue
+    const todayRevenue = await prisma.transaction.aggregate({
+      where: {
+        date: {
+          gte: todayStart,
+          lte: todayEnd,
+        },
+      },
       _sum: {
         amount: true,
       },
-      where: {
-        date: {
-          gte: startOfDay,
-          lt: endOfDay,
-        },
-      },
     });
 
-    // Calculate weekly revenue
-    const weeklyRevenue = await prisma.transaction.aggregate({
+    // This week's revenue
+    const weekRevenue = await prisma.transaction.aggregate({
+      where: {
+        date: {
+          gte: weekStart,
+          lte: todayEnd, // TodayEnd ensures the revenue is up to the current time
+        },
+      },
       _sum: {
         amount: true,
       },
-      where: {
-        date: {
-          gte: startOfWeek,
-          lt: endOfWeek,
-        },
-      },
     });
 
-    // Calculate monthly revenue
-    const monthlyRevenue = await prisma.transaction.aggregate({
-      _sum: {
-        amount: true,
-      },
+    // This month's revenue
+    const monthRevenue = await prisma.transaction.aggregate({
       where: {
         date: {
-          gte: startOfMonth,
-          lt: endOfMonth,
+          gte: monthStart,
+          lte: todayEnd,
         },
+      },
+      _sum: {
+        amount: true,
       },
     });
 
@@ -147,12 +131,12 @@ export async function GET() {
       data: {
         recentTransactions,
         recentItemMovements,
-        totalCustomers,
-        newCustomers,
-        totalTransactions,
-        dailyRevenue: dailyRevenue._sum.amount || 0,
-        weeklyRevenue: weeklyRevenue._sum.amount || 0,
-        monthlyRevenue: monthlyRevenue._sum.amount || 0,
+        totalCustomersToday: totalCustomersToday.length,
+        newCustomersToday,
+        totalTransactionsToday,
+        todayRevenue: todayRevenue._sum.amount || 0, // Revenue for today
+        weekRevenue: weekRevenue._sum.amount || 0,   // Revenue for this week
+        monthRevenue: monthRevenue._sum.amount || 0, // Revenue for this month
       },
     });
   } catch (error) {

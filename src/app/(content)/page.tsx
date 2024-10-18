@@ -47,12 +47,12 @@ const Dashboard: React.FC = () => {
         if (data.success) {
           setRecentTransactions(data.data.recentTransactions);
           setRecentItemMovements(data.data.recentItemMovements);
-          setTotalCustomers(data.data.totalCustomers);
-          setNewCustomers(data.data.newCustomers);
-          setTotalTransactions(data.data.totalTransactions);
-          setDailyRevenue(data.data.dailyRevenue); // Set daily revenue
-          setWeeklyRevenue(data.data.weeklyRevenue); // Set weekly revenue
-          setMonthlyRevenue(data.data.monthlyRevenue); // Set monthly revenue
+          setTotalCustomers(data.data.totalCustomersToday);
+          setNewCustomers(data.data.newCustomersToday);
+          setTotalTransactions(data.data.totalTransactionsToday);
+          setDailyRevenue(data.data.todayRevenue); // Set daily revenue
+          setWeeklyRevenue(data.data.weekRevenue); // Set weekly revenue
+          setMonthlyRevenue(data.data.monthRevenue); // Set monthly revenue
         }
       })
       .catch((error) => console.error("Error fetching dashboard data:", error));
