@@ -264,7 +264,7 @@ const PlaceOrderPage: React.FC = () => {
                 className="mb-4"
                 icon={<PlusOutlined />}
               >
-                Tambah Item
+                Tambah Lebih Banyak Barang
               </Button>
             </>
           )}

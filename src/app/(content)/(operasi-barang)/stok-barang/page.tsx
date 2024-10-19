@@ -34,13 +34,13 @@ const StokBarang: React.FC = () => {
     try {
       const response = await fetch("/api/barang/list-barang");
       if (!response.ok) {
-        throw new Error("Failed to fetch data");
+        throw new Error("Gagal mengambil data");
       }
       const result = await response.json();
       if (result.success) {
         setSortedData(result.data);
       } else {
-        throw new Error(result.error || "Failed to fetch data");
+        throw new Error(result.error || "Gagal mengambil data");
       }
       setLoading(false);
     } catch (error) {
@@ -84,21 +84,21 @@ const StokBarang: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update quantity");
+        throw new Error("Gagal memperbarui stok");
       }
 
       const result = await response.json();
       if (result.success) {
         message.success(
-          `Quantity ${action === "tambah" ? "increased" : "decreased"} successfully`,
+          `Quantity ${action === "tambah" ? "tambah" : "kurangi"} stok barang berhasil`,
         );
         fetchData(); // Refresh the data
       } else {
-        throw new Error(result.error || "Failed to update quantity");
+        throw new Error(result.error || "Gagal memperbarui stok");
       }
     } catch (error) {
-      console.error("Error updating quantity:", error);
-      message.error("Failed to update quantity");
+      console.error("Gagal memperbarui stok:", error);
+      message.error("Gagal memperbarui stok");
     }
   };
 
